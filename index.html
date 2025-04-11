@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CCFR Burn Permits</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --primary-color: #c0392b;
+      --bg-color: #fef6f0;
+      --text-color: #333;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #fff;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      color: var(--text-color);
+    }
+    input, select, button {
+      padding: 12px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .date-group {
+      display: flex;
+      flex-direction: column;
+    }
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #a93226;
+    }
+    .map-preview {
+      width: 100%;
+      max-height: 300px;
+      margin-top: -5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      object-fit: cover;
+    }
+  </style>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAii5QAjnlrj2pF47c4qajZSXMkX5OQoVU&libraries=places"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>CCFR Burn Permit Submission</h1>
+    <form id="burnForm">
+      <label for="name">Responsible Party Full Name</label>
+      <input type="text" id="name" name="name" required />
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" required />
+      <label for="address">Property Address</label>
+      <input type="text" id="address" name="address" required />
+      <img id="mapPreview" class="map-preview" src="" alt="Map Preview" style="display:none;" />
+      <label for="burnType">Burn Type</label>
+      <select id="burnType" name="burnType" required>
+        <option value="">--Select--</option>
+        <option value="Yard Debris">Yard Debris</option>
+        <option value="Agricultural">Agricultural</option>
+        <option value="Land Clearing">Land Clearing</option>
+        <option value="Prescribed Burn">Prescribed Burn</option>
+        <option value="Other">Other</option>
+      </select>
+      <div class="date-group">
+        <label for="startDate">Start Date</label>
+        <input type="date" id="startDate" name="startDate" required />
+      </div>
+      <div class="date-group">
+        <label for="endDate">End Date</label>
+        <input type="date" id="endDate" name="endDate" required />
+      </div>
+      <label for="approvedBy">Approved By</label>
+      <select id="approvedBy" name="approvedBy" required>
+        <option value="">--Select--</option>
+        <option value="Matt Smith">Matt Smith</option>
+        <option value="Russ Deboodt">Russ Deboodt</option>
+        <option value="Jerimiah Kenfield">Jerimiah Kenfield</option>
+        <option value="Dan Freauff">Dan Freauff</option>
+        <option value="Bill Welch">Bill Welch</option>
+      </select>
+      <button type="submit">Submit Burn Permit</button>
+    </form>
+  </div>
+  <script>
+    const form = document.getElementById("burnForm");
+    const addressInput = document.getElementById("address");
+    const mapPreview = document.getElementById("mapPreview");
+    const API_KEY = "AIzaSyAii5QAjnlrj2pF47c4qajZSXMkX5OQoVU";
+
+    function updateMap(address) {
+      if (!address) {
+        mapPreview.style.display = 'none';
+        return;
+      }
+      const formatted = encodeURIComponent(`${address}, Crook County, Oregon`);
+      const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${formatted}&zoom=14&size=600x300&maptype=roadmap&markers=color:red%7C${formatted}&key=${API_KEY}`;
+      mapPreview.src = mapUrl;
+      mapPreview.style.display = 'block';
+    }
+
+    function initAutocomplete() {
+      const autocomplete = new google.maps.places.Autocomplete(addressInput);
+      autocomplete.setFields(["formatted_address"]);
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place.formatted_address) {
+          addressInput.value = place.formatted_address;
+          updateMap(place.formatted_address);
+        }
+      });
+    }
+
+    addressInput.addEventListener("blur", () => updateMap(addressInput.value));
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => data[key] = value);
+      const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("\n");
+      const emailRecipients = "stooley@ccf-r.com,jshannon@ccf-r.com";
+      window.location.href = `mailto:${emailRecipients}?subject=Burn Permit Submission&body=${encodeURIComponent(body)}`;
+    });
+
+    window.addEventListener('load', initAutocomplete);
+  </script>
+</body>
+</html>
