@@ -72,7 +72,7 @@
       object-fit: cover;
     }
   </style>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAii5QAjnlrj2pF47c4qajZSXMkX5OQoVU&libraries=places"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAii5QAjnlrj2pF47c4qajZSXMkX5OQoVU"></script>
 </head>
 <body>
   <div class="container">
@@ -131,31 +131,19 @@
       mapPreview.style.display = 'block';
     }
 
-    function initAutocomplete() {
-      const autocomplete = new google.maps.places.Autocomplete(addressInput);
-      autocomplete.setFields(["formatted_address"]);
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        if (place.formatted_address) {
-          addressInput.value = place.formatted_address;
-          updateMap(place.formatted_address);
-        }
-      });
-    }
-
     addressInput.addEventListener("blur", () => updateMap(addressInput.value));
 
     form.addEventListener("submit", function(e) {
       e.preventDefault();
+
       const formData = new FormData(form);
       const data = {};
       formData.forEach((value, key) => data[key] = value);
+
       const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("\n");
       const emailRecipients = "stooley@ccf-r.com,jshannon@ccf-r.com";
       window.location.href = `mailto:${emailRecipients}?subject=Burn Permit Submission&body=${encodeURIComponent(body)}`;
     });
-
-    window.addEventListener('load', initAutocomplete);
   </script>
 </body>
 </html>
