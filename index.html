@@ -120,46 +120,45 @@
     </form>
   </div>
   <script>
-    const form = document.getElementById("burnForm");
-    const addressInput = document.getElementById("address");
-    const mapPreview = document.getElementById("mapPreview");
-    const API_KEY = "AIzaSyAii5QAjnlrj2pF47c4qajZSXMkX5OQoVU";
+  const form = document.getElementById("burnForm");
+  const addressInput = document.getElementById("address");
+  const mapPreview = document.getElementById("mapPreview");
+  const API_KEY = "AIzaSyAii5QAjnlrj2pF47c4qajZSXMkX5OQoVU";
 
-    function updateMap(address) {
-      if (!address) {
-        mapPreview.style.display = 'none';
-        return;
-      }
-      const formatted = encodeURIComponent(`${address}, Crook County, Oregon`);
-      const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${formatted}&zoom=14&size=600x300&maptype=roadmap&markers=color:red%7C${formatted}&key=${API_KEY}`;
-      mapPreview.src = mapUrl;
-      mapPreview.style.display = 'block';
+  // Generate permit number on page load
+  const today = new Date();
+  const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+  let count = localStorage.getItem(`count-${dateKey}`);
+  count = count ? parseInt(count) + 1 : 1;
+  localStorage.setItem(`count-${dateKey}`, count);
+  const permitNumber = `${dateKey}-${count}`;
+  document.getElementById("permitNumber").innerText = `Permit #: ${permitNumber}`;
+
+  function updateMap(address) {
+    if (!address) {
+      mapPreview.style.display = 'none';
+      return;
     }
+    const formatted = encodeURIComponent(`${address}, Crook County, Oregon`);
+    const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${formatted}&zoom=14&size=600x300&maptype=roadmap&markers=color:red%7C${formatted}&key=${API_KEY}`;
+    mapPreview.src = mapUrl;
+    mapPreview.style.display = 'block';
+  }
 
-    addressInput.addEventListener("blur", () => updateMap(addressInput.value));
+  addressInput.addEventListener("blur", () => updateMap(addressInput.value));
 
-    form.addEventListener("submit", function(e) {
-      // Generate permit number based on date and count
-      const today = new Date();
-      const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-      let count = localStorage.getItem(`count-${dateKey}`);
-      count = count ? parseInt(count) + 1 : 1;
-      localStorage.setItem(`count-${dateKey}`, count);
-      const permitNumber = `${dateKey}-${count}`;
-      document.getElementById("permitNumber").innerText = `Permit #: ${permitNumber}`;
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
 
-      e.preventDefault();
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value, key) => data[key] = value);
+    data["Permit Number"] = permitNumber;
 
-      const formData = new FormData(form);
-      const data = {};
-      formData.forEach((value, key) => data[key] = value);
-
-      data["Permit Number"] = permitNumber;
-      const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("
-");
-      const emailRecipients = "stooley@ccf-r.com,jshannon@ccf-r.com";
-      window.location.href = `mailto:${emailRecipients}?subject=Burn Permit Submission&body=${encodeURIComponent(body)}`;
-    });
-  </script>
+    const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("\n");
+    const emailRecipients = "stooley@ccf-r.com,jshannon@ccf-r.com";
+    window.location.href = `mailto:${emailRecipients}?subject=Burn Permit Submission&body=${encodeURIComponent(body)}`;
+  });
+</script>
 </body>
 </html>
