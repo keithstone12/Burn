@@ -155,9 +155,11 @@
     formData.forEach((value, key) => data[key] = value);
     data["Permit Number"] = permitNumber;
 
-    const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("\n");
+    const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("
+");
+    const subjectLine = data.address ? data.address : `Permit ${permitNumber}`;
     const emailRecipients = "stooley@ccf-r.com,jshannon@ccf-r.com";
-    window.location.href = `mailto:${emailRecipients}?subject=Burn Permit Submission&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:${emailRecipients}?subject=${encodeURIComponent(subjectLine)}&body=${encodeURIComponent(body)}`;
   });
 </script>
 </body>
