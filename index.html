@@ -77,6 +77,7 @@
 <body>
   <div class="container">
     <h1>CCFR Burn Permit Submission</h1>
+    <p id="permitNumber" style="text-align:center; font-weight: bold; margin-top: -10px; margin-bottom: 20px;"></p>
     <form id="burnForm">
       <label for="name">Responsible Party Full Name</label>
       <input type="text" id="name" name="name" required />
@@ -138,13 +139,24 @@
     addressInput.addEventListener("blur", () => updateMap(addressInput.value));
 
     form.addEventListener("submit", function(e) {
+      // Generate permit number based on date and count
+      const today = new Date();
+      const dateKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+      let count = localStorage.getItem(`count-${dateKey}`);
+      count = count ? parseInt(count) + 1 : 1;
+      localStorage.setItem(`count-${dateKey}`, count);
+      const permitNumber = `${dateKey}-${count}`;
+      document.getElementById("permitNumber").innerText = `Permit #: ${permitNumber}`;
+
       e.preventDefault();
 
       const formData = new FormData(form);
       const data = {};
       formData.forEach((value, key) => data[key] = value);
 
-      const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("\n");
+      data["Permit Number"] = permitNumber;
+      const body = Object.entries(data).map(([key, val]) => `${key}: ${val}`).join("
+");
       const emailRecipients = "stooley@ccf-r.com,jshannon@ccf-r.com";
       window.location.href = `mailto:${emailRecipients}?subject=Burn Permit Submission&body=${encodeURIComponent(body)}`;
     });
